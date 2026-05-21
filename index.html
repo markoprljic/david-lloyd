@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Booking App — User Journey Flows v3</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: #EBEBEB;
+    color: #1d2028;
+    padding: 48px 40px;
+  }
+
+  /* ── DOC HEADER ── */
+  .doc-header { margin-bottom: 56px; }
+  .doc-header h1 {
+    font-size: 28px; font-weight: 800; color: #1d2028;
+    letter-spacing: -0.5px; margin-bottom: 4px;
+  }
+  .doc-header p { font-size: 13px; color: #4d525c; }
+
+  /* ── USER TYPE BLOCK ── */
+  .user-block { margin-bottom: 72px; }
+
+  /* Level 1 — User type banner */
+  .user-banner {
+    display: flex; align-items: center; gap: 16px;
+    background: #1d2028; color: #fff;
+    padding: 20px 28px;
+    border-radius: 10px 10px 0 0;
+  }
+  .user-banner .user-icon { font-size: 28px; line-height: 1; }
+  .user-banner .user-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: #a7a8ab;
+    display: block; margin-bottom: 2px;
+  }
+  .user-banner .user-name {
+    font-size: 26px; font-weight: 800;
+    letter-spacing: -0.3px; line-height: 1;
+  }
+  .user-banner .user-desc {
+    margin-left: auto; font-size: 12px; color: #a7a8ab;
+    max-width: 280px; text-align: right; line-height: 1.5;
+  }
+
+  /* Banner accent colours */
+  .banner-guest   { background: #3a3e4a; }
+  .banner-member  { background: #6b1f4a; }
+  .banner-family  { background: #125954; }
+  .banner-courses { background: #2e3a8a; }
+  .banner-pt      { background: #5a2e00; }
+  .banner-alert   { background: #5a1a1a; }
+  .banner-rolling { background: #1a3a1a; }
+  .banner-demand  { background: #1a2a4a; }
+  .banner-events  { background: #3a1a5a; }
+
+  /* ── SWIMLANE WRAPPER ── */
+  .swimlane-wrap {
+    background: #fff;
+    border: 1px solid #d5d5d8;
+    border-top: none;
+    overflow-x: auto;
+  }
+
+  /* Level 2 — Phase header row */
+  .phase-row {
+    display: flex;
+    border-bottom: 2px solid #1d2028;
+    min-width: max-content;
+  }
+  .phase-cell {
+    flex: 0 0 190px; padding: 12px 16px;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    color: #fff; background: #ac4c87;
+    line-height: 1.3; display: flex; align-items: center;
+  }
+  .phase-cell:last-child { border-right: none; }
+
+  .ph-guest   { background: #4d525c; }
+  .ph-member  { background: #ac4c87; }
+  .ph-family  { background: #237d78; }
+  .ph-courses { background: #3d50b5; }
+  .ph-pt      { background: #8b4500; }
+  .ph-alert   { background: #8b2020; }
+  .ph-rolling { background: #2a5c2a; }
+  .ph-demand  { background: #1e3f7a; }
+  .ph-events  { background: #5c2080; }
+
+  /* Level 3 & 4 — Swimlane columns */
+  .steps-row {
+    display: flex; min-width: max-content; align-items: stretch;
+  }
+  .steps-col {
+    flex: 0 0 190px; border-right: 1px solid #e8e9ec;
+    padding: 14px 12px; display: flex;
+    flex-direction: column; gap: 6px;
+  }
+  .steps-col:last-child { border-right: none; }
+
+  /* Level 4 — Individual step */
+  .step-item {
+    font-size: 12px; color: #1d2028; line-height: 1.45;
+    padding: 7px 10px;
+    background: #f8f8f9;
+    border-left: 3px solid #dedfe1;
+    border-radius: 0 4px 4px 0;
+  }
+  .step-item.key           { background: #fdf0f7; border-left-color: #ac4c87; font-weight: 600; color: #6b1f4a; }
+  .step-item.key.teal      { background: #f0faf9; border-left-color: #237d78; color: #125954; }
+  .step-item.key.blue      { background: #eef1fb; border-left-color: #3d50b5; color: #1a2460; }
+  .step-item.key.brown     { background: #fff4eb; border-left-color: #8b4500; color: #5a2e00; }
+  .step-item.key.red       { background: #fef0f0; border-left-color: #8b2020; color: #5a0a0a; }
+  .step-item.key.green     { background: #f0f7f0; border-left-color: #2a5c2a; color: #1a3a1a; }
+  .step-item.key.navy      { background: #eef2f9; border-left-color: #1e3f7a; color: #0d1f3c; }
+  .step-item.key.purple    { background: #f7f0fd; border-left-color: #5c2080; color: #3a1060; }
+  .step-item.conditional   { background: #fffbf0; border-left-color: #e0aa00; color: #5a4400; font-style: italic; }
+  .step-item.system        { background: #f3f3f3; border-left-color: #c0c1c5; color: #4d525c; font-size: 11px; }
+
+  /* ── INFO PANEL (Entry Points / Key Rules / Alt Paths) ── */
+  .info-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-top: 2px solid #1d2028;
+    background: #f8f8f9;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+  }
+  .info-col {
+    padding: 18px 20px;
+    border-right: 1px solid #e0e0e3;
+  }
+  .info-col:last-child { border-right: none; }
+
+  .info-col-header {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
+    text-transform: uppercase; color: #4d525c;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e3;
+  }
+  .info-col-header .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-entry   { background: #4d525c; }
+  .dot-rule    { background: #ac4c87; }
+  .dot-rule-teal   { background: #237d78; }
+  .dot-rule-blue   { background: #3d50b5; }
+  .dot-rule-brown  { background: #8b4500; }
+  .dot-rule-red    { background: #8b2020; }
+  .dot-rule-green  { background: #2a5c2a; }
+  .dot-rule-navy   { background: #1e3f7a; }
+  .dot-rule-purple { background: #5c2080; }
+  .dot-alt     { background: #1d2028; }
+
+  .info-list {
+    list-style: none; display: flex; flex-direction: column; gap: 5px;
+  }
+  .info-list li {
+    font-size: 12px; color: #1d2028; line-height: 1.45;
+    padding: 5px 8px 5px 24px;
+    position: relative;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #e8e9ec;
+  }
+  .info-list li::before {
+    content: '';
+    position: absolute;
+    left: 9px; top: 10px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #dedfe1;
+  }
+  .info-list.rules li::before  { background: #ac4c87; }
+  .info-list.rules.teal li::before  { background: #237d78; }
+  .info-list.rules.blue li::before  { background: #3d50b5; }
+  .info-list.rules.brown li::before { background: #8b4500; }
+  .info-list.rules.red li::before   { background: #8b2020; }
+  .info-list.rules.green li::before { background: #2a5c2a; }
+  .info-list.rules.navy li::before  { background: #1e3f7a; }
+  .info-list.rules.purple li::before{ background: #5c2080; }
+  .info-list.alt li::before    { background: #1d2028; }
+
+  .info-list li strong { font-weight: 700; color: #1d2028; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>Class Booking App — User Journey Flows</h1>
+  <p>Version 3 &nbsp;·&nbsp; All user types &nbsp;·&nbsp; Swimlane + Entry Points, Key Rules &amp; Alternative Paths &nbsp;·&nbsp; May 2026</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     1. GUEST USER
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-guest">
+    <div class="user-icon">👤</div>
+    <div>
+      <span class="user-label">User Type 1</span>
+      <div class="user-name">Guest User</div>
+    </div>
+    <div class="user-desc">Unauthenticated visitor. Can browse content but cannot make bookings. Journey ends at registration.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-guest">Arrival</div>
+      <div class="phase-cell ph-guest">Homepage</div>
+      <div class="phase-cell ph-guest">Browsing</div>
+      <div class="phase-cell ph-guest">Registration</div>
+      <div class="phase-cell ph-guest">Account Setup</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">App loaded for first time</div>
+        <div class="step-item">No account present</div>
+        <div class="step-item key">Guest session started</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Homepage visible in guest mode</div>
+        <div class="step-item">Featured classes displayed</div>
+        <div class="step-item">Class timetable preview visible</div>
+        <div class="step-item">Club benefits and content visible</div>
+        <div class="step-item key">Prompted to get started</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Class timetable available to view</div>
+        <div class="step-item">Class details and trainer info readable</div>
+        <div class="step-item">Categories and filters available</div>
+        <div class="step-item conditional">Booking restricted — sign-up required</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Registration form presented</div>
+        <div class="step-item">Personal details provided</div>
+        <div class="step-item">Email or phone number verified</div>
+        <div class="step-item">Password created</div>
+        <div class="step-item key">Account created successfully</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Membership type confirmed</div>
+        <div class="step-item">Profile preferences set</div>
+        <div class="step-item">Club location assigned</div>
+        <div class="step-item key">Full member access granted</div>
+        <div class="step-item system">Continues as Member →</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>First-time app download and launch</li>
+        <li>Club website redirect to app</li>
+        <li>Referral or invitation link</li>
+        <li>Social media or marketing campaign</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule"></div>Key Rules</div>
+      <ul class="info-list rules">
+        <li>Browsing is permitted without an account</li>
+        <li>No bookings can be made without registration</li>
+        <li>All class and trainer details are visible in read-only mode</li>
+        <li>A valid email or phone number is required to register</li>
+        <li>Membership must be active before app access is granted</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Register via the club website instead of the app</li>
+        <li>Register at the club reception in person</li>
+        <li>Call the club to set up membership before using the app</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     2. MEMBER — CORE CLASS BOOKING
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-member">
+    <div class="user-icon">🏃</div>
+    <div>
+      <span class="user-label">User Type 2</span>
+      <div class="user-name">Member — Class Booking</div>
+    </div>
+    <div class="user-desc">Authenticated gym member. Core journey from home dashboard through to post-class feedback.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-member">Home Dashboard</div>
+      <div class="phase-cell ph-member">Search &amp; Browse</div>
+      <div class="phase-cell ph-member">Class Detail</div>
+      <div class="phase-cell ph-member">Booking</div>
+      <div class="phase-cell ph-member">Payment</div>
+      <div class="phase-cell ph-member">Confirmation</div>
+      <div class="phase-cell ph-member">Pre-Class</div>
+      <div class="phase-cell ph-member">Class Experience</div>
+      <div class="phase-cell ph-member">Post-Class</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">Personal schedule reviewed</div>
+        <div class="step-item">Today and tomorrow's classes visible</div>
+        <div class="step-item">Quick links available (Timetable, PT, Programmes, BioAge)</div>
+        <div class="step-item">Featured content and promotions visible</div>
+        <div class="step-item key">Decision to find a class</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Timetable accessed via Book tab</div>
+        <div class="step-item">Date chosen (today, tomorrow or specific date)</div>
+        <div class="step-item">Classes listed by time</div>
+        <div class="step-item">Class searched by name or trainer</div>
+        <div class="step-item">Results filtered by time of day, duration, or category</div>
+        <div class="step-item key">Target class identified</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Class information reviewed</div>
+        <div class="step-item">Trainer details checked</div>
+        <div class="step-item">Studio location noted</div>
+        <div class="step-item">Available time slots reviewed</div>
+        <div class="step-item key">Availability confirmed</div>
+        <div class="step-item conditional">Class full — Alert Me available</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Preferred time slot chosen</div>
+        <div class="step-item conditional">Additional members added if booking for others</div>
+        <div class="step-item">Booking summary reviewed</div>
+        <div class="step-item key">Booking submitted</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item conditional">Applies to paid classes only</div>
+        <div class="step-item">Class cost reviewed</div>
+        <div class="step-item">Payment method confirmed</div>
+        <div class="step-item key">Payment authorised</div>
+        <div class="step-item system">Transaction processed</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key">Booking confirmed</div>
+        <div class="step-item">Booking details reviewed</div>
+        <div class="step-item">Class saved to personal calendar</div>
+        <div class="step-item">Pre-class reminder set</div>
+        <div class="step-item system">Class appears in My Schedule</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item system">Reminder notification received</div>
+        <div class="step-item">Upcoming class reviewed in schedule</div>
+        <div class="step-item conditional">Virtual: live stream link active 10 min before</div>
+        <div class="step-item conditional">In-person: travel to club arranged</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">In-studio class attended</div>
+        <div class="step-item conditional">Live stream joined (virtual option)</div>
+        <div class="step-item conditional">On-demand content accessed</div>
+        <div class="step-item system">Session recorded in activity history</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Class rated (Stars)</div>
+        <div class="step-item">Feedback submitted</div>
+        <div class="step-item system">Schedule and history updated</div>
+        <div class="step-item system">BioAge data refreshed</div>
+        <div class="step-item key">Next class considered</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>Book tab in bottom navigation</li>
+        <li>Timetable quick action on home dashboard</li>
+        <li>My Schedule — browsing empty time slots</li>
+        <li>Push notification for new or recommended classes</li>
+        <li>Deep link from email or club communication</li>
+        <li>Search from anywhere in the app</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule"></div>Key Rules</div>
+      <ul class="info-list rules">
+        <li><strong>Free classes confirm immediately</strong> — no payment step</li>
+        <li><strong>Paid classes require payment</strong> before confirmation is issued</li>
+        <li>Cancellation is free <strong>up to 24 hours before</strong> the class starts</li>
+        <li>Late cancellation may result in a charge or credit loss</li>
+        <li>Booking window opens a set number of days in advance per club policy</li>
+        <li>Class capacity is limited — first come, first served</li>
+        <li>A member may book for additional guests subject to guest policy</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Book the same class on a different available date or time</li>
+        <li>Join the Alert Me waitlist if the class is full</li>
+        <li>Book an equivalent class at a different club location</li>
+        <li>Contact reception to make or modify a booking</li>
+        <li>Book via the club website (if available)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     3. MEMBER WITH CHILDREN — CRECHE
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-family">
+    <div class="user-icon">👨‍👧</div>
+    <div>
+      <span class="user-label">User Type 3</span>
+      <div class="user-name">Member with Children — Creche</div>
+    </div>
+    <div class="user-desc">Authenticated member with children. Books childcare alongside their own gym session.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-family">Creche Discovery</div>
+      <div class="phase-cell ph-family">Session Selection</div>
+      <div class="phase-cell ph-family">Booking</div>
+      <div class="phase-cell ph-family">Payment</div>
+      <div class="phase-cell ph-family">Confirmation</div>
+      <div class="phase-cell ph-family">Manage Booking</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">Creche section located in app</div>
+        <div class="step-item">Available creche sessions viewed</div>
+        <div class="step-item">Sessions filtered by child's age range</div>
+        <div class="step-item key teal">Suitable session identified</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Session date and time reviewed</div>
+        <div class="step-item">Capacity and availability confirmed</div>
+        <div class="step-item key teal">Session selected</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Child details provided</div>
+        <div class="step-item">Session details reviewed</div>
+        <div class="step-item key teal">Booking submitted</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item conditional">Applies if session has a fee</div>
+        <div class="step-item">Fee reviewed</div>
+        <div class="step-item">Payment method confirmed</div>
+        <div class="step-item key teal">Payment authorised</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key teal">Creche booking confirmed</div>
+        <div class="step-item">Booking details reviewed</div>
+        <div class="step-item">Session saved to calendar</div>
+        <div class="step-item system">Creche team notified</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Upcoming creche bookings reviewed</div>
+        <div class="step-item">Individual session cancelled if needed</div>
+        <div class="step-item">Child details updated if required</div>
+        <div class="step-item key teal">Booking adjusted or kept</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>Creche section accessed from the app navigation</li>
+        <li>Kids &amp; Family category in class browser</li>
+        <li>Home dashboard featured content (if promoted)</li>
+        <li>During own class booking — linked creche suggestion</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule-teal"></div>Key Rules</div>
+      <ul class="info-list rules teal">
+        <li><strong>Child's age must fall within</strong> the session's stated age range</li>
+        <li>Creche must typically be booked <strong>alongside a member's own session</strong></li>
+        <li><strong>Free creche confirms immediately</strong>; paid sessions require payment first</li>
+        <li>Maximum number of children per creche session applies</li>
+        <li>Cancellation policy mirrors standard class cancellation rules</li>
+        <li>Child details (name, age, any medical notes) required at booking</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Call reception to book a creche session directly</li>
+        <li>Book creche at the front desk on arrival (subject to availability)</li>
+        <li>Choose a different creche session time that fits the child's age band</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     4. MEMBER — COURSES
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-courses">
+    <div class="user-icon">📚</div>
+    <div>
+      <span class="user-label">User Type 4</span>
+      <div class="user-name">Member — Courses</div>
+    </div>
+    <div class="user-desc">Member booking a structured multi-session course. All sessions reserved in one transaction.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-courses">Course Discovery</div>
+      <div class="phase-cell ph-courses">Course Detail</div>
+      <div class="phase-cell ph-courses">Booking</div>
+      <div class="phase-cell ph-courses">Payment</div>
+      <div class="phase-cell ph-courses">Confirmation</div>
+      <div class="phase-cell ph-courses">Session Attendance</div>
+      <div class="phase-cell ph-courses">Post-Course</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">Courses section accessed</div>
+        <div class="step-item">Available courses listed</div>
+        <div class="step-item">Courses filtered by category or availability</div>
+        <div class="step-item key blue">Course of interest identified</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Course description reviewed</div>
+        <div class="step-item">Schedule reviewed (days, times, duration)</div>
+        <div class="step-item">Instructor details checked</div>
+        <div class="step-item">Number of sessions confirmed</div>
+        <div class="step-item key blue">Course suitability confirmed</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">All session dates reviewed</div>
+        <div class="step-item">Full course reserved</div>
+        <div class="step-item key blue">Booking submitted for all sessions</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Total course fee reviewed</div>
+        <div class="step-item">Payment method confirmed</div>
+        <div class="step-item key blue">Payment authorised</div>
+        <div class="step-item system">Transaction processed</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key blue">Course booking confirmed</div>
+        <div class="step-item">All session dates visible in schedule</div>
+        <div class="step-item">Course details saved to calendar</div>
+        <div class="step-item system">All sessions added to My Schedule</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Each session attended as scheduled</div>
+        <div class="step-item">Progress tracked across sessions</div>
+        <div class="step-item conditional">Individual session cancelled if needed (subject to policy)</div>
+        <div class="step-item system">Attendance recorded per session</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Course rated and reviewed</div>
+        <div class="step-item key blue">Course marked as complete</div>
+        <div class="step-item system">Completion recorded in activity history</div>
+        <div class="step-item">Next course considered</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>Courses section in app navigation</li>
+        <li>Home dashboard featured or promoted courses</li>
+        <li>Email or push notification about new course availability</li>
+        <li>Category browsing within class discovery</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule-blue"></div>Key Rules</div>
+      <ul class="info-list rules blue">
+        <li><strong>Courses are booked and paid for in full</strong> — no session-by-session booking</li>
+        <li>Individual sessions within a course <strong>cannot be booked separately</strong></li>
+        <li>All sessions are reserved simultaneously at point of booking</li>
+        <li><strong>Course cancellation policy may differ</strong> from single class cancellations</li>
+        <li>Partial refunds for missed sessions are subject to club policy</li>
+        <li>Some courses may have <strong>prerequisites or age restrictions</strong></li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Book an equivalent course at a different start date</li>
+        <li>Book individual drop-in classes if a course is unavailable</li>
+        <li>Contact reception to enquire about course waitlists</li>
+        <li>Book via the club website if available</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     5. MEMBER — PERSONAL TRAINING
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-pt">
+    <div class="user-icon">🏋️</div>
+    <div>
+      <span class="user-label">User Type 5</span>
+      <div class="user-name">Member — Personal Training</div>
+    </div>
+    <div class="user-desc">Member booking a one-to-one session with a personal trainer. Accessed via home dashboard shortcut.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-pt">PT Discovery</div>
+      <div class="phase-cell ph-pt">Trainer Selection</div>
+      <div class="phase-cell ph-pt">Session Booking</div>
+      <div class="phase-cell ph-pt">Payment</div>
+      <div class="phase-cell ph-pt">Confirmation</div>
+      <div class="phase-cell ph-pt">PT Session</div>
+      <div class="phase-cell ph-pt">Post-Session</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">Personal Training accessed from home dashboard</div>
+        <div class="step-item">Available trainers listed</div>
+        <div class="step-item key brown">Decision to book PT session made</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Trainer profiles reviewed</div>
+        <div class="step-item">Specialities and experience checked</div>
+        <div class="step-item">Trainer availability reviewed</div>
+        <div class="step-item key brown">Preferred trainer selected</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Available date and time reviewed</div>
+        <div class="step-item">Session length confirmed</div>
+        <div class="step-item">Session details reviewed</div>
+        <div class="step-item key brown">Session booking submitted</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">PT session cost reviewed</div>
+        <div class="step-item">Payment method confirmed</div>
+        <div class="step-item key brown">Payment authorised</div>
+        <div class="step-item system">Transaction processed</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key brown">PT session confirmed</div>
+        <div class="step-item">Session details reviewed (trainer, time, location)</div>
+        <div class="step-item">Session saved to calendar</div>
+        <div class="step-item system">Session added to My Schedule</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Arrival at club at agreed time</div>
+        <div class="step-item">PT session completed with trainer</div>
+        <div class="step-item system">Session recorded in activity history</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Session rated and reviewed</div>
+        <div class="step-item">Trainer feedback provided</div>
+        <div class="step-item key brown">Follow-up session considered</div>
+        <div class="step-item system">Activity history updated</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>Personal Training quick action on home dashboard</li>
+        <li>Trainer profile pages within the app</li>
+        <li>PT section accessible via app navigation</li>
+        <li>Push notification or email promotion for PT offers</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule-brown"></div>Key Rules</div>
+      <ul class="info-list rules brown">
+        <li><strong>PT sessions always require payment</strong> — no free PT bookings</li>
+        <li>Sessions must be <strong>booked in advance</strong> — no walk-in booking via app</li>
+        <li>Cancellation free <strong>up to 24 hours before</strong> the session</li>
+        <li><strong>Late cancellation fee applies</strong> — charged to payment method on file</li>
+        <li>PT packages (multi-session bundles) may be purchased separately and redeemed here</li>
+        <li>Trainer assignment is subject to their individual availability</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Contact the trainer directly via reception to arrange a session</li>
+        <li>Book a different available trainer if first choice is fully booked</li>
+        <li>Purchase a PT package for discounted multi-session booking</li>
+        <li>Book via reception or phone if the app shows no availability</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     6. MEMBER — ALERT ME
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-alert">
+    <div class="user-icon">🔔</div>
+    <div>
+      <span class="user-label">User Type 6</span>
+      <div class="user-name">Member — Alert Me</div>
+    </div>
+    <div class="user-desc">Member interested in a fully booked class. Registers for an alert and books when a space opens.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-alert">Class Discovery</div>
+      <div class="phase-cell ph-alert">Alert Registration</div>
+      <div class="phase-cell ph-alert">Waiting Period</div>
+      <div class="phase-cell ph-alert">Space Available</div>
+      <div class="phase-cell ph-alert">Booking</div>
+      <div class="phase-cell ph-alert">Confirmation</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">Class timetable browsed</div>
+        <div class="step-item">Desired class located</div>
+        <div class="step-item key red">Class identified as fully booked</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Alert Me option selected on the class</div>
+        <div class="step-item key red">Alert successfully registered</div>
+        <div class="step-item system">Waitlist position recorded</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item system">System monitors class availability</div>
+        <div class="step-item">Waitlist status visible in schedule</div>
+        <div class="step-item conditional">Alert cancelled if plans change</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item system">Cancellation received from another member</div>
+        <div class="step-item key red">Push notification sent to member</div>
+        <div class="step-item system">Space held temporarily</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Notification reviewed</div>
+        <div class="step-item">Class details confirmed</div>
+        <div class="step-item">Booking submitted promptly</div>
+        <div class="step-item conditional">Payment completed if class is paid</div>
+        <div class="step-item key red">Booking secured</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key red">Booking confirmed</div>
+        <div class="step-item">Class added to schedule</div>
+        <div class="step-item">Calendar reminder set</div>
+        <div class="step-item system">Alert cleared from waitlist</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>Class detail page when the class is shown as fully booked</li>
+        <li>Class list view when a class displays a "full" status indicator</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule-red"></div>Key Rules</div>
+      <ul class="info-list rules red">
+        <li>Alert Me is <strong>only available on fully booked classes</strong></li>
+        <li>Notification is sent when a space becomes available — <strong>member must act quickly</strong></li>
+        <li>Alert applies to a <strong>specific class instance</strong> (date and time), not all future occurrences</li>
+        <li>Only <strong>one alert per class instance</strong> per member</li>
+        <li>Alert is <strong>automatically cleared</strong> once the class date passes</li>
+        <li>If the notification is not acted on promptly, the space may be taken by another member</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Book the same class on a different available date or time</li>
+        <li>Book a similar class in the same category</li>
+        <li>Check back manually for cancellations without setting an alert</li>
+        <li>Contact reception — they may be able to add to a managed waitlist</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     7. MEMBER — ROLLING BOOKINGS
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-rolling">
+    <div class="user-icon">🔁</div>
+    <div>
+      <span class="user-label">User Type 7</span>
+      <div class="user-name">Member — Rolling Bookings</div>
+    </div>
+    <div class="user-desc">Member setting up a recurring class booking that auto-reserves the same slot on a regular basis.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-rolling">Class Selection</div>
+      <div class="phase-cell ph-rolling">Rolling Setup</div>
+      <div class="phase-cell ph-rolling">Confirmation</div>
+      <div class="phase-cell ph-rolling">Ongoing Schedule</div>
+      <div class="phase-cell ph-rolling">Management</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">Class timetable browsed</div>
+        <div class="step-item">Regular class identified</div>
+        <div class="step-item">Recurring availability confirmed</div>
+        <div class="step-item key green">Class selected for rolling booking</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Rolling booking option enabled</div>
+        <div class="step-item">Recurrence schedule reviewed (days, frequency)</div>
+        <div class="step-item">Start and end dates set if applicable</div>
+        <div class="step-item key green">Rolling booking confirmed</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key green">All recurring sessions confirmed</div>
+        <div class="step-item">Full schedule visible in My Schedule</div>
+        <div class="step-item system">All upcoming sessions auto-reserved</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Recurring classes visible week by week</div>
+        <div class="step-item">Each session attended as scheduled</div>
+        <div class="step-item system">Attendance recorded per session</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Upcoming sessions reviewed</div>
+        <div class="step-item">Individual session cancelled if needed</div>
+        <div class="step-item">All future sessions cancelled if needed</div>
+        <div class="step-item key green">Rolling schedule adjusted or maintained</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>Class detail page for eligible recurring classes</li>
+        <li>Class list view where rolling booking is indicated as available</li>
+        <li>My Schedule — converting a one-off booking into a rolling one</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule-green"></div>Key Rules</div>
+      <ul class="info-list rules green">
+        <li>Rolling bookings are <strong>only available on eligible recurring classes</strong></li>
+        <li>All future sessions are <strong>automatically reserved</strong> once set up</li>
+        <li>An <strong>individual session can be cancelled</strong> without affecting the rest of the rolling schedule</li>
+        <li><strong>Cancelling all sessions</strong> removes all future occurrences at once</li>
+        <li>Same 24-hour cancellation policy applies to each individual session</li>
+        <li>Changes to the class by the club (trainer change, time change) may affect the rolling booking</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Book each class occurrence individually instead of as a rolling booking</li>
+        <li>Book a structured Course if a fixed multi-session format is preferred</li>
+        <li>Contact reception to set up a recurring booking manually</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     8. MEMBER — ON-DEMAND
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-demand">
+    <div class="user-icon">▶️</div>
+    <div>
+      <span class="user-label">User Type 8</span>
+      <div class="user-name">Member — On-Demand</div>
+    </div>
+    <div class="user-desc">Member accessing pre-recorded or virtual class content at any time. No advance booking required.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-demand">Content Discovery</div>
+      <div class="phase-cell ph-demand">Content Selection</div>
+      <div class="phase-cell ph-demand">Viewing Session</div>
+      <div class="phase-cell ph-demand">Completion</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">On-Demand section accessed from navigation</div>
+        <div class="step-item">Content library browsed</div>
+        <div class="step-item">Results filtered by category, duration, or level</div>
+        <div class="step-item key navy">Content of interest identified</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Class or video details reviewed</div>
+        <div class="step-item">Instructor and duration confirmed</div>
+        <div class="step-item conditional">Live stream joined at scheduled time if applicable</div>
+        <div class="step-item key navy">Content selected to watch</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Session started at a chosen time</div>
+        <div class="step-item">Content viewed to completion</div>
+        <div class="step-item conditional">Session paused and resumed if needed</div>
+        <div class="step-item system">Progress tracked</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key navy">Session completed</div>
+        <div class="step-item">Content rated and reviewed</div>
+        <div class="step-item system">Activity logged in history</div>
+        <div class="step-item">Further content browsed</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>On-Demand tab in the bottom navigation bar</li>
+        <li>Home dashboard featured content cards</li>
+        <li>Push notification for new content releases</li>
+        <li>Recommendation after completing an in-studio or live class</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule-navy"></div>Key Rules</div>
+      <ul class="info-list rules navy">
+        <li><strong>No advance booking required</strong> — content is available on demand</li>
+        <li>Available <strong>24/7</strong> regardless of club opening hours</li>
+        <li>Included in <strong>standard membership</strong> — premium content may require an upgrade</li>
+        <li><strong>Live stream content</strong> requires joining at the scheduled broadcast time</li>
+        <li>Recorded versions of live sessions may be made available after broadcast</li>
+        <li>Content catalogue may change — some videos are removed or rotated periodically</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Attend the same class in person at the club if a live session is preferred</li>
+        <li>Access content via the club website or desktop browser if available</li>
+        <li>Book a live class through the standard booking flow for a scheduled session</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     9. MEMBER — CLUB EVENTS
+     ═══════════════════════════════════════════════════ -->
+<div class="user-block">
+  <div class="user-banner banner-events">
+    <div class="user-icon">🎉</div>
+    <div>
+      <span class="user-label">User Type 9</span>
+      <div class="user-name">Member — Club Events</div>
+    </div>
+    <div class="user-desc">Member booking a special one-off event at the club, separate from the regular class timetable.</div>
+  </div>
+
+  <div class="swimlane-wrap">
+    <div class="phase-row">
+      <div class="phase-cell ph-events">Event Discovery</div>
+      <div class="phase-cell ph-events">Event Detail</div>
+      <div class="phase-cell ph-events">Booking</div>
+      <div class="phase-cell ph-events">Payment</div>
+      <div class="phase-cell ph-events">Confirmation</div>
+      <div class="phase-cell ph-events">Attendance</div>
+    </div>
+    <div class="steps-row">
+      <div class="steps-col">
+        <div class="step-item">Events section browsed</div>
+        <div class="step-item">Upcoming events listed</div>
+        <div class="step-item key purple">Event of interest identified</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Event description reviewed</div>
+        <div class="step-item">Date, time, and location confirmed</div>
+        <div class="step-item">Availability checked</div>
+        <div class="step-item key purple">Decision to attend made</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Spot reserved at the event</div>
+        <div class="step-item conditional">Number of attendees confirmed if group booking</div>
+        <div class="step-item">Booking details reviewed</div>
+        <div class="step-item key purple">Booking submitted</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item conditional">Applies if event has a fee</div>
+        <div class="step-item">Event fee reviewed</div>
+        <div class="step-item">Payment method confirmed</div>
+        <div class="step-item key purple">Payment authorised</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item key purple">Event booking confirmed</div>
+        <div class="step-item">Event details reviewed</div>
+        <div class="step-item">Event saved to calendar</div>
+        <div class="step-item system">Event added to My Schedule</div>
+      </div>
+      <div class="steps-col">
+        <div class="step-item">Arrival at event venue</div>
+        <div class="step-item">Event attended</div>
+        <div class="step-item system">Attendance recorded</div>
+        <div class="step-item">Event rated if feedback requested</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-entry"></div>Entry Points</div>
+      <ul class="info-list">
+        <li>Club Events section in app navigation</li>
+        <li>Home dashboard featured event promotions</li>
+        <li>Push notification or email about upcoming events</li>
+        <li>Class category browsing — events may appear alongside regular classes</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-rule-purple"></div>Key Rules</div>
+      <ul class="info-list rules purple">
+        <li>Events have <strong>limited capacity</strong> — early booking is recommended</li>
+        <li><strong>Free events confirm immediately</strong>; paid events require payment first</li>
+        <li>Cancellation policy for events <strong>may differ from standard classes</strong> — check event details</li>
+        <li>Some events are <strong>members-only</strong>; others may be open to non-members or guests</li>
+        <li>Group bookings may be available — additional guests subject to club guest policy</li>
+      </ul>
+    </div>
+    <div class="info-col">
+      <div class="info-col-header"><div class="dot dot-alt"></div>Alternative Paths</div>
+      <ul class="info-list alt">
+        <li>Book via the club website if the event is listed there</li>
+        <li>Contact reception to reserve a place by phone or in person</li>
+        <li>Check for a similar event at a future date if the current one is full</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- Footer -->
+<div style="margin-top:40px;padding-top:20px;border-top:1px solid #d5d5d8;font-size:11px;color:#a7a8ab;line-height:1.8;">
+  Class Booking App &nbsp;·&nbsp; User Journey Documentation v3 &nbsp;·&nbsp; 9 user types &nbsp;·&nbsp;
+  Includes: Entry Points, Key Rules, Alternative Paths &nbsp;·&nbsp;
+  Source: Figma file hvcTsmO3UsCwHywL7QNmAz &nbsp;·&nbsp; May 2026
+</div>
+
+</body>
+</html>
